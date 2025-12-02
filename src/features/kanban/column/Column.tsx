@@ -1,16 +1,14 @@
 import type { LayOutProps, Column as ColumnData } from "../../../types";
 
-
 export type ColumnProps = LayOutProps & ColumnData
 
 
 export default function Column ({id, title, cardIds, children}: ColumnProps) {
 
-
     return (
          <div
             key={id}
-            className="min-w-[260px] max-w-[320px] bg-[#020617] rounded-xl border border-[#1f2937] grid grid-rows-[auto_auto] p-[18px]"
+            className="min-w-[260px] max-w-[320px] bg-[#020617] rounded-xl border border-[#1f2937] grid grid-rows-[auto_auto] p-[18px] min-h-[60px]"
          >
                      {/* header kolom */}
           <div className="w-full flex justify-between items-center mb-[8px]">
