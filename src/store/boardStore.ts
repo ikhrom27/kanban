@@ -129,11 +129,9 @@ const createBoardStore: StateCreator<BoardState> = (set, get) => {
         },   
         reorderColumn(fromIndex, toIndex) {
             const currentBoard = get().board;
-            const selectedColumOrder = currentBoard.columnOrder
-            console.log(fromIndex, toIndex, 'iniiii')
+            const selectedColumOrder = Array.from(currentBoard.columnOrder)
             const [ moved ] = selectedColumOrder.splice(fromIndex, 1)
             selectedColumOrder.splice(toIndex, 0, moved)
-            console.log(selectedColumOrder, 'yayayya')
 
             const newBoard: Board = {
                 ...currentBoard,

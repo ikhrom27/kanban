@@ -1,49 +1,31 @@
-import { useState } from "react";
+import { useKanban } from "../features/kanban/hooks/useKanban";
+import { type DropResult, DragDropContext } from "@hello-pangea/dnd";
+import { useModal } from "../hooks/useModal";
 import BoardWrapper from "../components/layout/BoardWrapper";
 import ButtonAddColumn from "../components/ui/buttons/ButtonAddColumn";
-import { useBoardStore } from "../store/boardStore";
 import ColumnModal from "../features/kanban/column/ColumnModal";
 import CardModal from "../features/kanban/card/CardModal";
-import { type DropResult, DragDropContext} from "@hello-pangea/dnd";
 import ColumnList from "../features/kanban/column/ColumnList";
 
 
-
-
 export default function Board() {
-  const board = useBoardStore((state) => state.board)
-  const addColumn = useBoardStore((state) => state.addColumn)
-  const addCard = useBoardStore((state) => state.addCard)
-  const reorderCardInColumn = useBoardStore((state) => state.reorderCardInColumn)
-  const reorderCardBetweenColumn = useBoardStore((state) => state.reorderCardBetweenColumn)
-  const reorderColumn = useBoardStore((state) => state.reorderColumn)
+  const { board, actions } = useKanban();
+  const columnModal = useModal();
+  const cardModal = useModal<{ columnId: string }>();
 
-  const [showModal, setShowModal] = useState(false)
-  const [showCardModal, setShowCardModal] = useState(false)
-  const [selectedColumnId, setSelectedColumnId] = useState('')
-
-
-  const handleShow = () => setShowModal(true)
-  const handleClose = () => setShowModal(false)
 
   const handleShowCardModal = (columnId: string) => {
-    setShowCardModal(true)
-    setSelectedColumnId(columnId)
-  }
-
-  const handleCloseCardModal = () => {
-    setShowCardModal(false)
+    cardModal.open({ columnId })
   }
 
   const handleColumnSubmit = (title: string) => {
-    addColumn(title)
-    handleClose()
+    actions.addColumn(title)
+    columnModal.close()
   }
 
   const handleCardSubmit = (payload: { title: string; columnId: string, id: string, meta: string }) => {
-    console.log(payload)
-    addCard(payload)
-    handleCloseCardModal()
+    actions.addCard(payload)
+    cardModal.close
   }
 
   const handleDrag = (result: DropResult) => {
@@ -55,18 +37,18 @@ export default function Board() {
     if (destination.index === source.index && destination.droppableId === source.droppableId) return
 
     // const columnId = source.droppableId
-    if(type === 'COLUMN') {
-      return reorderColumn(source.index, destination.index)
+    if (type === 'COLUMN') {
+      return actions.reorderColumn(source.index, destination.index)
 
     } else {
-       const fromColumnId = source.droppableId
-       const toColumnId = destination.droppableId
+      const fromColumnId = source.droppableId
+      const toColumnId = destination.droppableId
 
-      if (destination.droppableId !== source.droppableId) reorderCardBetweenColumn(fromColumnId, source.index, toColumnId, destination.index)
-      else if (destination.droppableId === source.droppableId) reorderCardInColumn(fromColumnId, source.index, destination.index)
+      if (destination.droppableId !== source.droppableId) actions.reorderCardBetweenColumn(fromColumnId, source.index, toColumnId, destination.index)
+      else if (destination.droppableId === source.droppableId) actions.reorderCardInColumn(fromColumnId, source.index, destination.index)
     }
 
-   
+
   }
 
   return (
@@ -77,26 +59,25 @@ export default function Board() {
             board={board}
             onAddCard={handleShowCardModal}
           />
-          <ButtonAddColumn onClick={handleShow}>
+          <ButtonAddColumn onClick={columnModal.open}>
             <span className="text-[15px] text-[#60a5fa]">+</span>
             <span>Add column</span>
           </ButtonAddColumn>
         </BoardWrapper>
       </DragDropContext>
-      {showModal && (
+      {columnModal.isOpen && (
         <ColumnModal
-          onClose={handleClose}
+          onClose={columnModal.close}
           onSubmit={handleColumnSubmit}
         />
       )}
-      {showCardModal && (
+      {cardModal.isOpen && cardModal.data && (
         <CardModal
-          onClose={handleCloseCardModal}
+          onClose={cardModal.close}
           onSubmit={handleCardSubmit}
-          columnId={selectedColumnId}
+          columnId={cardModal.data?.columnId}
 
         />
-
       )}
     </>
   )
