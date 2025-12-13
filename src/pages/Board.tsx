@@ -1,13 +1,11 @@
 import { useState } from "react";
 import BoardWrapper from "../components/layout/BoardWrapper";
 import ButtonAddColumn from "../components/ui/buttons/ButtonAddColumn";
-import Column from "../features/kanban/column/Column";
 import { useBoardStore } from "../store/boardStore";
 import ColumnModal from "../features/kanban/column/ColumnModal";
-import Card from "../features/kanban/card/Card";
-import CardAddColumn from "../components/ui/buttons/CardAddColumn";
 import CardModal from "../features/kanban/card/CardModal";
-import { type DropResult, DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
+import { type DropResult, DragDropContext} from "@hello-pangea/dnd";
+import ColumnList from "../features/kanban/column/ColumnList";
 
 
 
@@ -49,7 +47,7 @@ export default function Board() {
   }
 
   const handleDrag = (result: DropResult) => {
-    const { source, destination } = result
+    const { source, destination, type } = result
 
 
     if (!destination) return
@@ -57,9 +55,7 @@ export default function Board() {
     if (destination.index === source.index && destination.droppableId === source.droppableId) return
 
     // const columnId = source.droppableId
-    console.log(source, 'source')
-    if(source.droppableId === 'board-1' && destination.droppableId === 'board-1') {
-      console.log('masukk sini kan')
+    if(type === 'COLUMN') {
       return reorderColumn(source.index, destination.index)
 
     } else {
@@ -77,100 +73,10 @@ export default function Board() {
     <>
       <DragDropContext onDragEnd={handleDrag}>
         <BoardWrapper>
-          <Droppable
-            droppableId="board-1"
-            direction="horizontal"
-           
-          >
-            {(provided) => (
-              <div ref={provided.innerRef}
-                {...provided.droppableProps}
-                className="flex items-start gap-[20px] overflow-x-auto pt-[2px] min-w-max"
-              >
-                {
-                  board.columnOrder.map((columnId, index) => {
-                    const colomn = board.columns[columnId];
-                    const cards = colomn.cardIds.map((cardId) => board.cards[cardId]);
-                    const isDone = colomn.id === 'done'
-                    return (
-                      <Draggable
-                        index={index}
-                        key={colomn.id}
-                        draggableId={colomn.id}
-                      >
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                          >
-                            <Column
-                              id={colomn.id}
-                              title={colomn.title}
-                              cardIds={colomn.cardIds}
-
-                            >
-                              <Droppable droppableId={colomn.id}>
-                                {(provided) => (
-                                  <div ref={provided.innerRef}
-                                    {...provided.droppableProps}
-                                    className="flex flex-col gap-[8px] min-h-[2px]"
-                                  >
-                                    {
-                                      cards.map((card, index) => {
-                                        return (
-                                          <Draggable
-                                            key={card.id}
-                                            draggableId={card.id}
-                                            index={index}
-                                          >
-                                            {(provided) => (
-                                              <div ref={provided.innerRef}
-                                                {...provided.draggableProps}
-                                                {...provided.dragHandleProps}
-                                              >
-
-                                                <Card
-                                                  id={card.id}
-                                                  title={card.title}
-                                                  meta={card.meta}
-                                                  isDone={isDone}
-                                                />
-
-                                              </div>
-                                            )}
-
-                                          </Draggable>
-
-                                        )
-                                      })
-                                    }
-                                    {provided.placeholder}
-                                  </div>
-                                )}
-
-
-                              </Droppable>
-                              <CardAddColumn
-                                onClick={() => handleShowCardModal(colomn.id)}
-                              >
-                                <span className="text-[14px]">+</span>
-                                <span>Add card</span>
-                              </CardAddColumn>
-                            </Column>
-                          </div>
-                        )}
-                      </Draggable>
-
-                    )
-                  })
-                }
-                {provided.placeholder}
-              </div>
-            )}
-
-
-          </Droppable>
+          <ColumnList
+            board={board}
+            onAddCard={handleShowCardModal}
+          />
           <ButtonAddColumn onClick={handleShow}>
             <span className="text-[15px] text-[#60a5fa]">+</span>
             <span>Add column</span>

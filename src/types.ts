@@ -54,5 +54,18 @@ export type ButtonProps = {
     className?: string
 }
 
+export type CardListProps = {
+    columnId: string;
+    cardIds: string[];
+    cards: Record<string, Card>;
+    isDone: boolean;
+
+}
+
+export type ColumnListProps = {
+   board: Board;
+   onAddCard: (columnId: string) => void
+}
+
 export type AddColumnFeatureProps = ModalFeatureProps<string>
 export type AddCardFeatureProps=ModalFeatureProps<AddCardPayload>
